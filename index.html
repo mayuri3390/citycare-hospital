@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CityCare Hospital — Advanced Medical Care You Can Trust</title>
+  <meta name="description" content="CityCare Hospital — Book appointments, access medical records, and consult top specialists online. Digital healthcare made simple.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="mainNav">
+    <div class="logo">
+      <i class="fas fa-hospital-user"></i>
+      CityCare Hospital
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="auth-btns" id="authBtns">
+      <a href="pages/login.html" class="btn btn-outline">Login</a>
+      <a href="pages/register.html" class="btn btn-primary">Register</a>
+    </div>
+    <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge"><i class="fas fa-shield-alt"></i> Trusted by 10,000+ Patients</div>
+      <h1>Advanced Medical Care <br><span class="highlight">You Can Trust</span></h1>
+      <p>Welcome to CityCare — your premium digital healthcare management system. Book appointments, access records, and consult top specialists from the comfort of your home.</p>
+      <div class="btn-group">
+        <a href="pages/register.html" class="btn btn-primary btn-lg" id="heroBookBtn">
+          <i class="fas fa-calendar-plus"></i> Book an Appointment
+        </a>
+        <a href="pages/login.html" class="btn btn-outline btn-lg btn-ghost">
+          <i class="fas fa-user"></i> Patient Portal
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong>50+</strong><span>Specialists</span></div>
+        <div class="hero-stat"><strong>10K+</strong><span>Patients</span></div>
+        <div class="hero-stat"><strong>24/7</strong><span>Support</span></div>
+        <div class="hero-stat"><strong>15+</strong><span>Years</span></div>
+      </div>
+    </div>
+    <div class="hero-graphic">
+      <div class="hero-card">
+        <div class="hcard-icon"><i class="fas fa-heartbeat"></i></div>
+        <div>
+          <div class="hcard-title">Health Monitor</div>
+          <div class="hcard-sub">Real-time vitals tracking</div>
+        </div>
+      </div>
+      <div class="hero-card hcard-2">
+        <div class="hcard-icon hcard-green"><i class="fas fa-user-md"></i></div>
+        <div>
+          <div class="hcard-title">Expert Doctors</div>
+          <div class="hcard-sub">Board-certified specialists</div>
+        </div>
+      </div>
+      <div class="hero-card hcard-3">
+        <div class="hcard-icon hcard-purple"><i class="fas fa-calendar-check"></i></div>
+        <div>
+          <div class="hcard-title">Easy Scheduling</div>
+          <div class="hcard-sub">Book in under 60 seconds</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Services -->
+  <section class="section" id="services">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Our Services</span>
+        <h2>Comprehensive Healthcare Solutions</h2>
+        <p>Everything you need for complete health management — all in one digital platform.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon" style="background:rgba(37,99,235,0.1);color:#2563eb">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <h3>Appointment Booking</h3>
+          <p>Easily schedule appointments with our top specialists at your preferred time slot.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon" style="background:rgba(16,185,129,0.1);color:#10b981">
+            <i class="fas fa-file-medical"></i>
+          </div>
+          <h3>Digital Records</h3>
+          <p>Access your complete medical history, prescriptions and test results anytime.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b">
+            <i class="fas fa-stethoscope"></i>
+          </div>
+          <h3>Expert Consultations</h3>
+          <p>Connect with board-certified doctors across 15+ specializations.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon" style="background:rgba(239,68,68,0.1);color:#ef4444">
+            <i class="fas fa-ambulance"></i>
+          </div>
+          <h3>Emergency Care</h3>
+          <p>24/7 emergency services with rapid response and expert trauma care.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6">
+            <i class="fas fa-flask"></i>
+          </div>
+          <h3>Lab & Diagnostics</h3>
+          <p>Advanced in-house laboratory and imaging services with fast report delivery.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon" style="background:rgba(6,182,212,0.1);color:#06b6d4">
+            <i class="fas fa-pills"></i>
+          </div>
+          <h3>Pharmacy</h3>
+          <p>On-site pharmacy with digital prescriptions and home delivery options.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="container stats-grid">
+      <div class="stat-item">
+        <div class="stat-num" data-target="50">0</div>
+        <div class="stat-label">Specialist Doctors</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="10000">0</div>
+        <div class="stat-label">Happy Patients</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="15">0</div>
+        <div class="stat-label">Years of Excellence</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="98">0</div>
+        <div class="stat-label">Patient Satisfaction %</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section" id="about">
+    <div class="container about-grid">
+      <div class="about-content">
+        <span class="section-tag">About Us</span>
+        <h2>Serving the Community Since 2009</h2>
+        <p>CityCare Hospital has been a cornerstone of healthcare excellence for over 15 years. We combine cutting-edge medical technology with compassionate patient care.</p>
+        <ul class="about-list">
+          <li><i class="fas fa-check-circle"></i> NABH Accredited Hospital</li>
+          <li><i class="fas fa-check-circle"></i> 24/7 Emergency Department</li>
+          <li><i class="fas fa-check-circle"></i> Cashless Insurance Support</li>
+          <li><i class="fas fa-check-circle"></i> Digital Health Records</li>
+        </ul>
+        <a href="pages/register.html" class="btn btn-primary">Get Started <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="about-visual">
+        <div class="avis-card">
+          <i class="fas fa-award"></i>
+          <div>
+            <strong>National Healthcare Award</strong>
+            <span>Best Digital Hospital 2024</span>
+          </div>
+        </div>
+        <div class="avis-card avis-card-2">
+          <i class="fas fa-users"></i>
+          <div>
+            <strong>Patient-First Approach</strong>
+            <span>Quality care, every time</span>
+          </div>
+        </div>
+        <div class="avis-card avis-card-3">
+          <i class="fas fa-microscope"></i>
+          <div>
+            <strong>Advanced Technology</strong>
+            <span>AI-driven diagnostics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section contact-section" id="contact">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Contact Us</span>
+        <h2>We're Here to Help</h2>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <h4>Location</h4>
+          <p>123 Health Avenue, MediCity, Mumbai - 400001</p>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+          <h4>Emergency</h4>
+          <p>+91 98765 43210<br>Available 24/7</p>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+          <h4>Email Us</h4>
+          <p>info@citycare.com<br>support@citycare.com</p>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon"><i class="fas fa-clock"></i></div>
+          <h4>Working Hours</h4>
+          <p>OPD: 8AM – 8PM<br>Emergency: 24/7</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><i class="fas fa-hospital-user"></i> CityCare Hospital</div>
+        <p>Committed to providing the best medical care with warmth and expertise.</p>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="pages/login.html">Patient Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#">Cardiology</a></li>
+          <li><a href="#">Neurology</a></li>
+          <li><a href="#">Pediatrics</a></li>
+          <li><a href="#">Orthopedics</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 CityCare Hospital. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/utils.js"></script>
+  <script>
+    // Redirect logged-in users to their dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('currentUser'));
+      if (user) {
+        const btns = document.getElementById('authBtns');
+        let href = 'pages/login.html';
+        if (user.role === 'patient') href = 'pages/patient_dashboard.html';
+        else if (user.role === 'doctor') href = 'pages/doctor_dashboard.html';
+        else if (user.role === 'receptionist') href = 'pages/receptionist_dashboard.html';
+        btns.innerHTML = `<a href="${href}" class="btn btn-primary"><i class="fas fa-tachometer-alt"></i> My Dashboard</a>`;
+      }
+
+      // Mobile menu toggle
+      document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+        document.querySelector('.nav-links').classList.toggle('mobile-open');
+      });
+
+      // Navbar scroll effect
+      window.addEventListener('scroll', () => {
+        const nav = document.getElementById('mainNav');
+        nav.classList.toggle('scrolled', window.scrollY > 50);
+      });
+
+      // Counter animation
+      const counters = document.querySelectorAll('.stat-num');
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const target = parseInt(entry.target.dataset.target);
+            let count = 0;
+            const step = Math.ceil(target / 60);
+            const timer = setInterval(() => {
+              count = Math.min(count + step, target);
+              entry.target.textContent = count.toLocaleString();
+              if (count >= target) clearInterval(timer);
+            }, 20);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      counters.forEach(c => observer.observe(c));
+    });
+  </script>
+</body>
+</html>

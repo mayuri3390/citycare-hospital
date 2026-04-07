@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard — CityCare Hospital</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="dashboard-layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2><i class="fas fa-hospital-user"></i> CityCare</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link tab-btn active" data-target="overview">
+        <i class="fas fa-chart-pie"></i> <span>Overview</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="appointments">
+        <i class="fas fa-calendar-check"></i> <span>Appointments</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="addRecord">
+        <i class="fas fa-notes-medical"></i> <span>Add Record</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="drRequests">
+        <i class="fas fa-file-alt"></i> <span>My Requests</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn" class="sidebar-link logout-link">
+        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h3>Doctor Dashboard</h3>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-toggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+        <div class="notif-wrapper">
+          <button class="notification-bell" title="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="badge" id="notif-badge" style="display:none">0</span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-panel-header">
+              <strong>Notifications</strong>
+              <button class="notif-mark-all" id="markAllRead">Mark all read</button>
+            </div>
+            <div id="notifList"><p class="empty-state">No notifications</p></div>
+          </div>
+        </div>
+        <div class="user-profile">
+          <div class="avatar" id="avatar-initials">D</div>
+          <span id="profile-name">Doctor</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Overview Tab -->
+      <div id="overview" class="tab-content active">
+        <div class="page-header">
+          <h2>Good day, Dr. <span id="welcome-name"></span>! 🩺</h2>
+          <p>Here's your practice overview</p>
+        </div>
+        <div class="dashboard-grid">
+          <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="stat-info"><h3 id="statTotal">—</h3><p>Total Appointments</p></div>
+          </div>
+          <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="stat-info"><h3 id="statToday">—</h3><p>Today's Appointments</p></div>
+          </div>
+          <div class="stat-card stat-yellow">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info"><h3 id="statPending">—</h3><p>Pending Approvals</p></div>
+          </div>
+          <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-check-double"></i></div>
+            <div class="stat-info"><h3 id="statCompleted">—</h3><p>Completed</p></div>
+          </div>
+        </div>
+        <div class="two-col-grid">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Appointment Distribution</span></div>
+            <div class="card-body chart-wrap">
+              <canvas id="doctorChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Quick Actions</span></div>
+            <div class="card-body quick-actions">
+              <button class="qa-btn" onclick="document.querySelector('[data-target=appointments]').click()">
+                <i class="fas fa-calendar-check"></i>
+                <span>View Appointments</span>
+              </button>
+              <button class="qa-btn" onclick="document.querySelector('[data-target=addRecord]').click()">
+                <i class="fas fa-notes-medical"></i>
+                <span>Add Medical Record</span>
+              </button>
+              <button class="qa-btn" onclick="document.querySelector('[data-target=drRequests]').click()">
+                <i class="fas fa-paper-plane"></i>
+                <span>Submit Request</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments Tab -->
+      <div id="appointments" class="tab-content">
+        <div class="page-header-row">
+          <div class="page-header">
+            <h2><i class="fas fa-calendar-check"></i> My Appointments</h2>
+          </div>
+          <div class="page-header-actions">
+            <input type="date" id="doctorDateFilter" class="form-control" style="width:180px">
+            <button class="btn btn-primary" id="showTodayBtn">
+              <i class="fas fa-calendar-day"></i> Today
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#ID</th><th>Patient</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="doctorApptsData">
+                  <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Record Form (inline) -->
+        <div id="recordFormContainer" style="display:none" class="card">
+          <div class="card-header">
+            <span class="card-title"><i class="fas fa-notes-medical"></i> Add Medical Record for <span id="recordPatientName"></span></span>
+            <button class="btn-icon" onclick="document.getElementById('recordFormContainer').style.display='none'"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="card-body">
+            <form id="recordForm">
+              <input type="hidden" id="recordApptId">
+              <input type="hidden" id="recordPatientId">
+              <div class="form-group">
+                <label>Diagnosis</label>
+                <textarea id="recordDiagnosis" class="form-control" rows="2" placeholder="Enter diagnosis…" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Prescription</label>
+                <textarea id="recordPrescription" class="form-control" rows="2" placeholder="Medications, dosage…"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Notes</label>
+                <textarea id="recordNotes" class="form-control" rows="2" placeholder="Additional notes…"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Record</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Record Tab -->
+      <div id="addRecord" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-notes-medical"></i> Add Medical Record</h2>
+        </div>
+        <div class="card form-card">
+          <div class="card-body">
+            <form id="recordForm2">
+              <div class="form-group">
+                <label>Patient User ID</label>
+                <input type="number" id="rec2PatientId" class="form-control" placeholder="Patient's system ID" required>
+              </div>
+              <div class="form-group">
+                <label>Diagnosis</label>
+                <textarea id="rec2Diagnosis" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Prescription</label>
+                <textarea id="rec2Prescription" class="form-control" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Notes</label>
+                <textarea id="rec2Notes" class="form-control" rows="2"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Record</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor Requests Tab -->
+      <div id="drRequests" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-file-alt"></i> Submit Request</h2>
+        </div>
+        <div class="two-col-grid">
+          <div class="card">
+            <div class="card-header"><span class="card-title">New Request</span></div>
+            <div class="card-body">
+              <form id="doctorRequestForm">
+                <div class="form-group">
+                  <label>Request Type</label>
+                  <select id="reqType" class="form-control" required>
+                    <option value="leave">Leave</option>
+                    <option value="reschedule">Reschedule</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Date</label>
+                  <input type="date" id="reqDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Reason</label>
+                  <textarea id="reqReason" class="form-control" rows="3" placeholder="Reason for request…"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit</button>
+              </form>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">My Requests</span></div>
+            <div class="card-body" id="myRequestsList">
+              <p class="empty-state">No requests yet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/dashboard.js"></script>
+  <script>
+    // Secondary record form handler (Add Record tab)
+    document.getElementById('recordForm2')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = getCurrentUser();
+      if (!user) return;
+      toggleLoader(true);
+      try {
+        await RecordAPI.create({
+          patient_id: parseInt(document.getElementById('rec2PatientId').value),
+          doctor_id: user._doctorId || user.doctor_id,
+          diagnosis: document.getElementById('rec2Diagnosis').value,
+          prescription: document.getElementById('rec2Prescription').value,
+          notes: document.getElementById('rec2Notes').value
+        });
+        showToast('Record saved!', 'success');
+        document.getElementById('recordForm2').reset();
+      } catch (err) {
+        showToast(err.message || 'Failed to save', 'error');
+      } finally {
+        toggleLoader(false);
+      }
+    });
+
+    // Mark all read
+    document.getElementById('markAllRead')?.addEventListener('click', async () => {
+      const user = getCurrentUser();
+      if (!user) return;
+      try { await NotificationAPI.markRead(); } catch {}
+      document.getElementById('notif-badge').style.display = 'none';
+    });
+  </script>
+</body>
+</html>

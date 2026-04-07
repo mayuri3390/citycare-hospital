@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — CityCare Hospital</title>
+  <meta name="description" content="Create your CityCare Hospital account as a patient, doctor, or receptionist.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card" style="max-width:520px;">
+      <div class="auth-header">
+        <div class="auth-logo"><i class="fas fa-hospital-user"></i></div>
+        <h2>Create Account</h2>
+        <p>Join CityCare Hospital today</p>
+      </div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label for="name"><i class="fas fa-user"></i> Full Name</label>
+          <input type="text" id="name" class="form-control" placeholder="John Smith" required>
+        </div>
+        <div class="form-group">
+          <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="your@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="password"><i class="fas fa-lock"></i> Password</label>
+          <div class="input-icon-right">
+            <input type="password" id="password" class="form-control" placeholder="Min. 8 characters" required minlength="6" autocomplete="new-password">
+            <button type="button" class="toggle-pass" id="togglePass" tabindex="-1"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="role"><i class="fas fa-id-badge"></i> Register As</label>
+          <select id="role" class="form-control" required>
+            <option value="patient">Patient</option>
+            <option value="doctor">Doctor</option>
+            <option value="receptionist">Receptionist</option>
+          </select>
+        </div>
+        <div class="form-group" id="specializationGroup" style="display:none">
+          <label for="specialization"><i class="fas fa-stethoscope"></i> Specialization</label>
+          <input type="text" id="specialization" class="form-control" placeholder="e.g. Cardiologist">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="login.html">Sign in</a></p>
+        <a href="../index.html" class="back-home"><i class="fas fa-home"></i> Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    document.getElementById('togglePass')?.addEventListener('click', () => {
+      const inp = document.getElementById('password');
+      const icon = document.querySelector('#togglePass i');
+      if (inp.type === 'password') { inp.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+      else { inp.type = 'password'; icon.className = 'fas fa-eye'; }
+    });
+  </script>
+</body>
+</html>

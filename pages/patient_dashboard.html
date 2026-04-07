@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Dashboard — CityCare Hospital</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="dashboard-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2><i class="fas fa-hospital-user"></i> CityCare</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link tab-btn active" data-target="dashboard" id="tabHome">
+        <i class="fas fa-home"></i> <span>Home</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="book" id="tabBook">
+        <i class="fas fa-calendar-plus"></i> <span>Book Appointment</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="appointments" id="tabAppts">
+        <i class="fas fa-calendar-check"></i> <span>My Appointments</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="records" id="tabRecords">
+        <i class="fas fa-file-medical"></i> <span>Medical Records</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="calendar" id="tabCal">
+        <i class="fas fa-calendar-alt"></i> <span>Calendar</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn" class="sidebar-link logout-link">
+        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h3>Patient Dashboard</h3>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-toggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+        <div class="notif-wrapper">
+          <button class="notification-bell" title="Notifications" id="notifBtn">
+            <i class="fas fa-bell"></i>
+            <span class="badge" id="notif-badge" style="display:none">0</span>
+          </button>
+          <!-- Notification Panel -->
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-panel-header">
+              <strong>Notifications</strong>
+              <button class="notif-mark-all" id="markAllRead">Mark all read</button>
+            </div>
+            <div id="notifList"><p class="empty-state">No notifications</p></div>
+          </div>
+        </div>
+        <div class="user-profile">
+          <div class="avatar" id="avatar-initials">U</div>
+          <span id="profile-name">User</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Home Tab -->
+      <div id="dashboard" class="tab-content active">
+        <div class="page-header">
+          <h2>Welcome back, <span id="welcome-name"></span>! 👋</h2>
+          <p>Your health dashboard at a glance</p>
+        </div>
+
+        <!-- Search & Filter Doctors -->
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="doctorSearch" placeholder="Search doctors by name…">
+          </div>
+          <select id="specFilter" class="form-control filter-select">
+            <option value="">All Specializations</option>
+          </select>
+        </div>
+
+        <div class="doctor-cards" id="doctorsGrid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+
+      <!-- Book Appointment Tab -->
+      <div id="book" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-calendar-plus"></i> Book Appointment</h2>
+        </div>
+        <div class="card form-card">
+          <div class="card-header"><span class="card-title">New Appointment</span></div>
+          <div class="card-body">
+            <form id="bookForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Select Doctor</label>
+                  <select id="doctorSelect" class="form-control" required>
+                    <option value="">Select a Doctor</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Preferred Date</label>
+                  <input type="date" id="apptDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Preferred Time</label>
+                  <input type="time" id="apptTime" class="form-control" required min="08:00" max="20:00">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-check-circle"></i> Confirm Booking
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Appointments Tab -->
+      <div id="appointments" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-calendar-check"></i> My Appointments</h2>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar card">
+          <div class="card-body" style="padding:1rem">
+            <div class="filter-row">
+              <div class="form-group mb-0">
+                <label>Status</label>
+                <select id="statusFilter" class="form-control">
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="form-group mb-0">
+                <label>Date</label>
+                <input type="date" id="dateFilter" class="form-control">
+              </div>
+              <div class="form-group mb-0">
+                <label>Doctor</label>
+                <select id="doctorFilter" class="form-control">
+                  <option value="">All Doctors</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="filterBtn" style="align-self:flex-end">
+                <i class="fas fa-filter"></i> Apply
+              </button>
+              <button class="btn btn-outline" id="clearFilterBtn" style="align-self:flex-end">
+                <i class="fas fa-times"></i> Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#ID</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="patientAppointmentsData">
+                  <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reschedule Form -->
+        <div id="rescheduleFormContainer" style="display:none" class="card">
+          <div class="card-header"><span class="card-title"><i class="fas fa-edit"></i> Reschedule Appointment</span></div>
+          <div class="card-body">
+            <form id="rescheduleForm">
+              <input type="hidden" id="reschedApptId">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>New Date</label>
+                  <input type="date" id="reschedDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>New Time</label>
+                  <input type="time" id="reschedTime" class="form-control" required>
+                </div>
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('rescheduleFormContainer').style.display='none'">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medical Records Tab -->
+      <div id="records" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-file-medical"></i> Medical Records</h2>
+        </div>
+        <div id="medicalRecordsContainer">
+          <p class="empty-state">Loading records…</p>
+        </div>
+
+        <!-- Upload Simulation -->
+        <div class="card" style="margin-top:2rem">
+          <div class="card-header"><span class="card-title">Upload Document</span></div>
+          <div class="card-body">
+            <form id="uploadForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Document Type</label>
+                  <input type="text" class="form-control" placeholder="e.g. Blood Test Results" required>
+                </div>
+                <div class="form-group">
+                  <label>Select File</label>
+                  <input type="file" class="form-control" accept=".pdf,.jpg,.png" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-outline">
+                <i class="fas fa-upload"></i> Upload Securely
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar Tab -->
+      <div id="calendar" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-calendar-alt"></i> Appointment Calendar</h2>
+        </div>
+        <div class="calendar-wrap">
+          <div id="appointmentCalendar" class="calendar-container"></div>
+        </div>
+      </div>
+
+    </div><!-- end page-content -->
+  </main>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/dashboard.js"></script>
+  <script>
+    // Clear filter button
+    document.getElementById('clearFilterBtn')?.addEventListener('click', () => {
+      ['statusFilter','dateFilter','doctorFilter'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const user = getCurrentUser();
+      if (user) renderPatientAppointments(user);
+    });
+  </script>
+</body>
+</html>
