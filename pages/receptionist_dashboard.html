@@ -25,6 +25,12 @@
       <a href="#" class="sidebar-link tab-btn" data-target="drRequestsMgmt">
         <i class="fas fa-clipboard-list"></i> <span>Doctor Requests</span>
       </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="rescheduleTab">
+        <i class="fas fa-calendar-check"></i> <span>Reschedule Appts</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="pendingDoctorsTab">
+        <i class="fas fa-user-md"></i> <span>Pending Doctors</span>
+      </a>
     </nav>
     <div class="sidebar-footer">
       <a href="#" id="logoutBtn" class="sidebar-link logout-link">
@@ -43,13 +49,14 @@
       <div class="topbar-right">
         <button class="theme-toggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
         <div class="notif-wrapper">
-          <button class="notification-bell" title="Notifications">
+          <button class="notification-bell" title="Notifications" id="notifBtn">
             <i class="fas fa-bell"></i>
             <span class="badge" id="notif-badge" style="display:none">0</span>
           </button>
           <div class="notif-panel" id="notifPanel">
             <div class="notif-panel-header">
               <strong>Notifications</strong>
+              <button class="notif-mark-all" id="markAllRead">Mark all read</button>
             </div>
             <div id="notifList"><p class="empty-state">No notifications</p></div>
           </div>
@@ -93,8 +100,14 @@
             <button class="qa-btn" onclick="document.querySelector('[data-target=allAppointments]').click()">
               <i class="fas fa-calendar-alt"></i><span>Manage Appointments</span>
             </button>
+            <button class="qa-btn" onclick="document.querySelector('[data-target=rescheduleTab]').click()">
+              <i class="fas fa-retweet"></i><span>Reschedule</span>
+            </button>
             <button class="qa-btn" onclick="document.querySelector('[data-target=drRequestsMgmt]').click()">
               <i class="fas fa-clipboard-check"></i><span>Doctor Requests</span>
+            </button>
+            <button class="qa-btn" onclick="document.querySelector('[data-target=pendingDoctorsTab]').click()">
+              <i class="fas fa-user-clock"></i><span>Pending Doctors</span>
             </button>
           </div>
         </div>
@@ -162,12 +175,88 @@
         </div>
       </div>
 
+      <!-- Reschedule Appointments Tab -->
+      <div id="rescheduleTab" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-calendar-check"></i> Reschedule Appointments</h2>
+          <p>Directly reschedule any appointment to a new date and time</p>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="filter-bar card">
+          <div class="card-body" style="padding:1rem">
+            <div class="filter-row">
+              <div class="form-group mb-0">
+                <label>Patient Name</label>
+                <input type="text" id="reschPatientSearch" class="form-control" placeholder="Search patient…">
+              </div>
+              <div class="form-group mb-0">
+                <label>Status</label>
+                <select id="reschStatusFilter" class="form-control">
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="reschSearchBtn" style="align-self:flex-end">
+                <i class="fas fa-search"></i> Search
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Reschedule To</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="reschedApptsList">
+                  <tr><td colspan="8" class="empty-state">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Doctors Tab -->
+      <div id="pendingDoctorsTab" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-user-md"></i> Pending Doctors</h2>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Doctor Name</th>
+                    <th>Email</th>
+                    <th>Speciality</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="pendingDoctorsTableList">
+                  <!-- JS injected -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
   <script src="../js/utils.js"></script>
   <script src="../js/api.js"></script>
+  <script src="../js/features.js"></script>
   <script src="../js/auth.js"></script>
-  <script src="../js/dashboard.js"></script>
+  <script src="../js/shared.js"></script>
+  <script src="../js/admin.js"></script>
 </body>
 </html>

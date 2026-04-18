@@ -18,6 +18,7 @@ from routes.appointment_routes import appointments_bp
 from routes.record_routes import records_bp
 from routes.notification_routes import notifications_bp
 from routes.doctor_request_routes import dr_requests_bp
+from routes.stats_routes import stats_bp
 
 
 def create_app(config_name: str = 'development') -> Flask:
@@ -35,6 +36,7 @@ def create_app(config_name: str = 'development') -> Flask:
     app.register_blueprint(records_bp, url_prefix='/api/records')
     app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
     app.register_blueprint(dr_requests_bp, url_prefix='/api/doctor-request')
+    app.register_blueprint(stats_bp, url_prefix='/api/stats')
 
     # Health check
     @app.route('/api/health')

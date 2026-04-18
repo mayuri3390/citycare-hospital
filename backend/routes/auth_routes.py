@@ -29,9 +29,12 @@ def register():
         if cursor.fetchone():
             return error('Email already registered', 409)
 
+        # Set is_approved=False for doctors, True for others
+        is_approved = False if role == 'doctor' else True
+
         cursor.execute(
-            "INSERT INTO users (name, email, password, role) VALUES (%s,%s,%s,%s)",
-            (name, email, hashed, role)
+            "INSERT INTO users (name, email, password, role, is_approved) VALUES (%s,%s,%s,%s,%s)",
+            (name, email, hashed, role, is_approved)
         )
         user_id = cursor.lastrowid
 
@@ -70,12 +73,36 @@ def login():
         if not user or not bcrypt.checkpw(password.encode(), user['password'].encode()):
             return error('Invalid email or password', 401)
 
+        if user['role'] == 'doctor' and not user.get('is_approved', True):
+            return error('Your account is pending admin approval.', 403)
+
         token = create_token({
             'id': user['id'],
             'name': user['name'],
             'email': user['email'],
             'role': user['role']
         })
+
+        # ── Feature 6: Login Tracking ──────────────────────────────────────
+        try:
+            cursor.execute(
+                """UPDATE users
+                   SET login_count = COALESCE(login_count, 0) + 1,
+                       last_login  = NOW()
+                   WHERE id = %s""",
+                (user['id'],)
+            )
+            # Get IP / user-agent from request headers
+            ip_addr    = request.headers.get('X-Forwarded-For', request.remote_addr or '')
+            user_agent = (request.headers.get('User-Agent') or '')[:500]
+            cursor.execute(
+                "INSERT INTO login_logs (user_id, ip_address, user_agent) VALUES (%s, %s, %s)",
+                (user['id'], ip_addr, user_agent)
+            )
+            conn.commit()
+        except Exception:
+            pass  # never block login due to tracking failure
+        # ──────────────────────────────────────────────────────────────────
 
         # Fetch doctor_id if role is doctor
         doctor_id = None
@@ -92,7 +119,8 @@ def login():
                 'name': user['name'],
                 'email': user['email'],
                 'role': user['role'],
-                'doctor_id': doctor_id
+                'doctor_id': doctor_id,
+                'login_count': (user.get('login_count') or 0) + 1
             }
         }, 'Login successful')
     except Exception as e:

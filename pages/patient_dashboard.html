@@ -29,6 +29,9 @@
       <a href="#" class="sidebar-link tab-btn" data-target="records" id="tabRecords">
         <i class="fas fa-file-medical"></i> <span>Medical Records</span>
       </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="myReports" id="tabReports">
+        <i class="fas fa-folder-open"></i> <span>My Reports</span>
+      </a>
       <a href="#" class="sidebar-link tab-btn" data-target="calendar" id="tabCal">
         <i class="fas fa-calendar-alt"></i> <span>Calendar</span>
       </a>
@@ -121,7 +124,34 @@
                 </div>
                 <div class="form-group">
                   <label>Preferred Time</label>
-                  <input type="time" id="apptTime" class="form-control" required min="08:00" max="20:00">
+                  <select id="apptTime" class="form-control" required>
+                    <option value="">Select Time</option>
+                    <option value="08:00">08:00 AM</option>
+                    <option value="08:30">08:30 AM</option>
+                    <option value="09:00">09:00 AM</option>
+                    <option value="09:30">09:30 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="10:30">10:30 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="11:30">11:30 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="12:30">12:30 PM</option>
+                    <option value="13:00">01:00 PM</option>
+                    <option value="13:30">01:30 PM</option>
+                    <option value="14:00">02:00 PM</option>
+                    <option value="14:30">02:30 PM</option>
+                    <option value="15:00">03:00 PM</option>
+                    <option value="15:30">03:30 PM</option>
+                    <option value="16:00">04:00 PM</option>
+                    <option value="16:30">04:30 PM</option>
+                    <option value="17:00">05:00 PM</option>
+                    <option value="17:30">05:30 PM</option>
+                    <option value="18:00">06:00 PM</option>
+                    <option value="18:30">06:30 PM</option>
+                    <option value="19:00">07:00 PM</option>
+                    <option value="19:30">07:30 PM</option>
+                    <option value="20:00">08:00 PM</option>
+                  </select>
                 </div>
               </div>
               <button type="submit" class="btn btn-primary btn-block">
@@ -202,7 +232,34 @@
                 </div>
                 <div class="form-group">
                   <label>New Time</label>
-                  <input type="time" id="reschedTime" class="form-control" required>
+                  <select id="reschedTime" class="form-control" required>
+                    <option value="">Select Time</option>
+                    <option value="08:00">08:00 AM</option>
+                    <option value="08:30">08:30 AM</option>
+                    <option value="09:00">09:00 AM</option>
+                    <option value="09:30">09:30 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="10:30">10:30 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="11:30">11:30 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="12:30">12:30 PM</option>
+                    <option value="13:00">01:00 PM</option>
+                    <option value="13:30">01:30 PM</option>
+                    <option value="14:00">02:00 PM</option>
+                    <option value="14:30">02:30 PM</option>
+                    <option value="15:00">03:00 PM</option>
+                    <option value="15:30">03:30 PM</option>
+                    <option value="16:00">04:00 PM</option>
+                    <option value="16:30">04:30 PM</option>
+                    <option value="17:00">05:00 PM</option>
+                    <option value="17:30">05:30 PM</option>
+                    <option value="18:00">06:00 PM</option>
+                    <option value="18:30">06:30 PM</option>
+                    <option value="19:00">07:00 PM</option>
+                    <option value="19:30">07:30 PM</option>
+                    <option value="20:00">08:00 PM</option>
+                  </select>
                 </div>
               </div>
               <div class="btn-row">
@@ -223,19 +280,19 @@
           <p class="empty-state">Loading records…</p>
         </div>
 
-        <!-- Upload Simulation -->
+        <!-- Upload Report Section -->
         <div class="card" style="margin-top:2rem">
-          <div class="card-header"><span class="card-title">Upload Document</span></div>
+          <div class="card-header"><span class="card-title"><i class="fas fa-upload"></i> Upload Report</span></div>
           <div class="card-body">
             <form id="uploadForm">
               <div class="form-row">
                 <div class="form-group">
                   <label>Document Type</label>
-                  <input type="text" class="form-control" placeholder="e.g. Blood Test Results" required>
+                  <input type="text" id="uploadDocType" class="form-control" placeholder="e.g. Blood Test Results" required>
                 </div>
                 <div class="form-group">
                   <label>Select File</label>
-                  <input type="file" class="form-control" accept=".pdf,.jpg,.png" required>
+                  <input type="file" id="uploadFile" class="form-control" accept=".pdf,.jpg,.png" required>
                 </div>
               </div>
               <button type="submit" class="btn btn-outline">
@@ -246,12 +303,24 @@
         </div>
       </div>
 
+      <!-- My Reports Tab -->
+      <div id="myReports" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-folder-open"></i> My Reports</h2>
+          <p>Uploaded documents and reports</p>
+        </div>
+        <div id="myReportsList">
+          <p class="empty-state">No reports uploaded yet.</p>
+        </div>
+      </div>
+
       <!-- Calendar Tab -->
       <div id="calendar" class="tab-content">
         <div class="page-header">
           <h2><i class="fas fa-calendar-alt"></i> Appointment Calendar</h2>
+          <p>Your upcoming appointments are highlighted below</p>
         </div>
-        <div class="calendar-wrap">
+        <div class="calendar-wrap" style="padding: 1rem; border-radius: 8px; background: var(--secondary);">
           <div id="appointmentCalendar" class="calendar-container"></div>
         </div>
       </div>
@@ -261,8 +330,10 @@
 
   <script src="../js/utils.js"></script>
   <script src="../js/api.js"></script>
+  <script src="../js/features.js"></script>
   <script src="../js/auth.js"></script>
-  <script src="../js/dashboard.js"></script>
+  <script src="../js/shared.js"></script>
+  <script src="../js/patient.js"></script>
   <script>
     // Clear filter button
     document.getElementById('clearFilterBtn')?.addEventListener('click', () => {

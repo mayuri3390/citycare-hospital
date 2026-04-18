@@ -17,15 +17,6 @@
         <p>Sign in to your CityCare account</p>
       </div>
 
-      <div class="demo-credentials">
-        <p><i class="fas fa-info-circle"></i> Demo credentials (password: CityPass@123)</p>
-        <div class="demo-btns">
-          <button class="demo-btn" onclick="fillDemo('patient@citycare.com')">Patient</button>
-          <button class="demo-btn" onclick="fillDemo('drsmith@citycare.com')">Doctor</button>
-          <button class="demo-btn" onclick="fillDemo('admin@citycare.com')">Receptionist</button>
-        </div>
-      </div>
-
       <form id="loginForm" novalidate>
         <div class="form-group">
           <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
@@ -57,11 +48,6 @@
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
   <script>
-    // Demo auto-fill
-    function fillDemo(email) {
-      document.getElementById('email').value = email;
-      document.getElementById('password').value = 'CityPass@123';
-    }
 
     // Password toggle
     document.getElementById('togglePass')?.addEventListener('click', () => {

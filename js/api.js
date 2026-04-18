@@ -1,6 +1,7 @@
 /**
  * api.js — Centralized API service for CityCare Hospital
  * All fetch calls go through this module.
+ * When backend is unavailable, falls back to localStorage (demo mode).
  */
 
 const API_BASE = 'http://localhost:5000/api';
@@ -32,7 +33,10 @@ async function apiFetch(endpoint, options = {}) {
   const config = { ...options, headers };
 
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`, config);
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => { ctrl.abort(); }, 5000);
+    const response = await fetch(`${API_BASE}${endpoint}`, { ...config, signal: ctrl.signal });
+    clearTimeout(timeout);
     const json = await response.json();
 
     if (!response.ok) {
@@ -40,7 +44,6 @@ async function apiFetch(endpoint, options = {}) {
     }
     return json;
   } catch (err) {
-    // Rethrow for callers to handle
     throw err;
   }
 }
@@ -85,6 +88,12 @@ const DoctorAPI = {
   },
   getSpecializations() {
     return apiFetch('/doctors/specializations');
+  },
+  getPending() {
+    return apiFetch('/doctors/pending');
+  },
+  approve(userId) {
+    return apiFetch(`/doctors/${userId}/approve`, { method: 'PUT' });
   }
 };
 
@@ -131,6 +140,14 @@ const RecordAPI = {
   },
   getForPatient(patientId) {
     return apiFetch(`/records/${patientId}`);
+  }
+};
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
+const StatsAPI = {
+  getReceptionistStats() {
+    return apiFetch('/stats');
   }
 };
 

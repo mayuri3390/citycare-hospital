@@ -1,17 +1,15 @@
 """Medical record routes."""
 from flask import Blueprint, request
 from config.db import get_db
-from utils.helpers import success, error, token_required
+from utils.helpers import success, error, token_required, role_required
 
 records_bp = Blueprint('records', __name__)
 
 
 @records_bp.route('', methods=['POST'])
 @token_required
+@role_required('doctor', 'receptionist')
 def create_record(current_user):
-    if current_user['role'] not in ('doctor', 'receptionist'):
-        return error('Forbidden', 403)
-
     data = request.get_json(silent=True) or {}
     patient_id = data.get('patient_id')
     doctor_id = data.get('doctor_id')

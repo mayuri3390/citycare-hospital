@@ -1,7 +1,7 @@
 """Appointment routes."""
 from flask import Blueprint, request
 from config.db import get_db
-from utils.helpers import success, error, token_required
+from utils.helpers import success, error, token_required, role_required
 
 appointments_bp = Blueprint('appointments', __name__)
 
@@ -69,9 +69,10 @@ def get_patient_appointments(user_id, current_user):
     cursor = conn.cursor(dictionary=True)
     try:
         # Filters
-        status_filter = request.args.get('status', '')
-        date_filter = request.args.get('date', '')
-        doctor_filter = request.args.get('doctor_id', '')
+        status_filter      = request.args.get('status', '')
+        date_filter        = request.args.get('date', '')
+        doctor_filter      = request.args.get('doctor_id', '')
+        doctor_name_filter = request.args.get('doctor_name', '')  # ← Feature 5: doctor name search
 
         query = """
             SELECT a.*, u.name AS patient_name, d.name AS doctor_name, d.specialization
@@ -91,6 +92,9 @@ def get_patient_appointments(user_id, current_user):
         if doctor_filter:
             query += " AND a.doctor_id = %s"
             params.append(doctor_filter)
+        if doctor_name_filter:
+            query += " AND d.name LIKE %s"
+            params.append(f"%{doctor_name_filter}%")
 
         query += " ORDER BY a.date DESC, a.time DESC"
         cursor.execute(query, params)
@@ -149,17 +153,16 @@ def get_doctor_appointments(doctor_id, current_user):
 
 @appointments_bp.route('/all', methods=['GET'])
 @token_required
+@role_required('receptionist', 'doctor')
 def get_all_appointments(current_user):
     """Receptionist: get all appointments with optional filters."""
-    if current_user['role'] not in ('receptionist', 'doctor'):
-        return error('Forbidden', 403)
-
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        status_filter = request.args.get('status', '')
-        date_filter = request.args.get('date', '')
-        doctor_filter = request.args.get('doctor_id', '')
+        status_filter      = request.args.get('status', '')
+        date_filter        = request.args.get('date', '')
+        doctor_filter      = request.args.get('doctor_id', '')
+        doctor_name_filter = request.args.get('doctor_name', '')  # ← Feature 5
 
         query = """
             SELECT a.*, u.name AS patient_name, d.name AS doctor_name, d.specialization
@@ -178,6 +181,9 @@ def get_all_appointments(current_user):
         if doctor_filter:
             query += " AND a.doctor_id = %s"
             params.append(doctor_filter)
+        if doctor_name_filter:
+            query += " AND d.name LIKE %s"
+            params.append(f"%{doctor_name_filter}%")
 
         query += " ORDER BY a.date DESC, a.time ASC"
         cursor.execute(query, params)

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('patient', 'doctor', 'receptionist') NOT NULL DEFAULT 'patient',
+    is_approved BOOLEAN DEFAULT TRUE,
     login_count INT DEFAULT 0,
     last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -126,12 +127,8 @@ INSERT IGNORE INTO users (name, email, password, role) VALUES
 -- ============================================================
 -- SEED DATA: DOCTORS
 -- ============================================================
-INSERT IGNORE INTO doctors (user_id, name, specialization, availability, experience, fee) VALUES
-(2, 'Dr. Sarah Smith', 'Cardiologist', 'Mon-Fri 9AM-5PM', '10 Yrs', 800.00),
-(NULL, 'Dr. John Doe', 'Dermatologist', 'Mon-Wed 10AM-4PM', '5 Yrs', 600.00),
-(NULL, 'Dr. Emily Chen', 'Pediatrician', 'Tue-Sat 9AM-3PM', '8 Yrs', 700.00),
-(NULL, 'Dr. Michael Brown', 'Neurologist', 'Mon-Thu 11AM-6PM', '12 Yrs', 1000.00),
-(NULL, 'Dr. Jessica White', 'Orthopedist', 'Wed-Sun 9AM-5PM', '6 Yrs', 750.00);
+-- (Doctors are seeded by the backend in db.py)
+
 
 -- ============================================================
 -- ADVANCED QUERIES SECTION (FOR DASHBOARD & FEATURES)
@@ -171,3 +168,5 @@ SELECT MONTH(date) AS month, COUNT(*) FROM appointments GROUP BY MONTH(date);
 -- FINAL CHECK
 -- ============================================================
 SHOW TABLES;
+
+SELECT login_count, last_login FROM users;

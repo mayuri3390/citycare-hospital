@@ -11,7 +11,7 @@ class Config:
     MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
     MYSQL_PORT = int(os.environ.get('MYSQL_PORT', 3306))
     MYSQL_USER = os.environ.get('MYSQL_USER', 'root')
-    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', '')
+    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', 'mysql2006')
     MYSQL_DB = os.environ.get('MYSQL_DB', 'citycare_db')
 
     CORS_ORIGINS = ['http://localhost:5500', 'http://127.0.0.1:5500',

@@ -15,8 +15,10 @@ function getCurrentUser() {
 
 function checkAuth(allowedRoles) {
   const user = getCurrentUser();
-  if (!user) {
-    window.location.href = '../pages/login.html';
+  const token = localStorage.getItem('token');
+  if (!user || !token) {
+    // Dashboard pages live inside pages/ folder, so login.html is in same dir
+    window.location.href = 'login.html';
     return null;
   }
   if (allowedRoles && !allowedRoles.includes(user.role)) {
@@ -33,6 +35,18 @@ function checkAuth(allowedRoles) {
   return user;
 }
 
+// ── Role Redirect ─────────────────────────────────────────────────────────────
+
+function _redirectByRole(role) {
+  // Pages are inside pages/ folder, so dashboard files are siblings
+  setTimeout(() => {
+    if (role === 'patient') window.location.href = 'patient_dashboard.html';
+    else if (role === 'doctor') window.location.href = 'doctor_dashboard.html';
+    else if (role === 'receptionist') window.location.href = 'receptionist_dashboard.html';
+    else window.location.href = 'login.html'; // fallback
+  }, 800);
+}
+
 // ── Login ─────────────────────────────────────────────────────────────────────
 
 async function handleLogin(e) {
@@ -42,38 +56,21 @@ async function handleLogin(e) {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
+  if (!email || !password) {
+    toggleLoader(false);
+    showToast('Please enter email and password', 'error');
+    return;
+  }
+
   try {
-    // Try real API first
     const data = await AuthAPI.login(email, password);
     toggleLoader(false);
     showToast(data.message || 'Login successful!', 'success');
     _redirectByRole(data.data.user.role);
-  } catch (apiErr) {
-    // Fallback: localStorage demo mode
-    try {
-      const users = JSON.parse(localStorage.getItem('users')) || [];
-      const user = users.find(u => u.email === email && u.password === password);
-      toggleLoader(false);
-      if (user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        showToast('Login successful! (Demo Mode)', 'success');
-        _redirectByRole(user.role);
-      } else {
-        showToast(apiErr.message || 'Invalid email or password', 'error');
-      }
-    } catch {
-      toggleLoader(false);
-      showToast('Login failed. Please try again.', 'error');
-    }
+  } catch (err) {
+    toggleLoader(false);
+    showToast(err.message || 'Login failed. Please try again.', 'error');
   }
-}
-
-function _redirectByRole(role) {
-  setTimeout(() => {
-    if (role === 'patient') window.location.href = 'patient_dashboard.html';
-    else if (role === 'doctor') window.location.href = 'doctor_dashboard.html';
-    else if (role === 'receptionist') window.location.href = 'receptionist_dashboard.html';
-  }, 1000);
 }
 
 // ── Register ──────────────────────────────────────────────────────────────────
@@ -94,25 +91,8 @@ async function handleRegister(e) {
     showToast(data.message || 'Registered successfully!', 'success');
     setTimeout(() => { window.location.href = 'login.html'; }, 1500);
   } catch (apiErr) {
-    // Fallback: localStorage demo mode
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    if (users.find(u => u.email === email)) {
-      toggleLoader(false);
-      showToast('Email already in use', 'error');
-      return;
-    }
-    const newUser = { id: generateId(), name, email, password, role };
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-
-    if (role === 'doctor') {
-      const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
-      doctors.push({ id: generateId(), name, spec: specialization || 'General', experience: '0 Yrs', user_id: newUser.id });
-      localStorage.setItem('doctors', JSON.stringify(doctors));
-    }
     toggleLoader(false);
-    showToast('Registered! (Demo Mode) Please login.', 'success');
-    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+    showToast(apiErr.message || 'Registration failed', 'error');
   }
 }
 
@@ -123,12 +103,26 @@ function handleLogout() {
   localStorage.removeItem('currentUser');
   localStorage.removeItem('token');
   showToast('Logged out successfully', 'success');
+  // Always redirect to login page (same pages/ folder)
   setTimeout(() => { window.location.href = 'login.html'; }, 1000);
 }
 
 // ── Event bindings ────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  const path = window.location.pathname;
+  const isLoginPage    = path.includes('login.html');
+  const isRegisterPage = path.includes('register.html');
+
+  // ── If already logged in, redirect away from login/register pages ──
+  if (isLoginPage || isRegisterPage) {
+    const existing = getCurrentUser();
+    if (existing) {
+      _redirectByRole(existing.role);
+      return; // Stop further binding on these pages
+    }
+  }
+
   const loginForm = document.getElementById('loginForm');
   if (loginForm) loginForm.addEventListener('submit', handleLogin);
 
