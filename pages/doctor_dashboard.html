@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Doctor Dashboard — CityCare Hospital</title>
+  <meta name="description" content="CityCare Hospital Doctor Dashboard – manage appointments, add medical records and view patient history.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="../css/style.css">
@@ -30,9 +31,6 @@
       </a>
       <a href="#" class="sidebar-link tab-btn" data-target="patientHistory">
         <i class="fas fa-history"></i> <span>Patient History</span>
-      </a>
-      <a href="#" class="sidebar-link tab-btn" data-target="calendar">
-        <i class="fas fa-calendar-alt"></i> <span>Calendar</span>
       </a>
     </nav>
     <div class="sidebar-footer">
@@ -115,9 +113,9 @@
                 <i class="fas fa-notes-medical"></i>
                 <span>Add Medical Record</span>
               </button>
-              <button class="qa-btn" onclick="document.querySelector('[data-target=drRequests]').click()">
-                <i class="fas fa-paper-plane"></i>
-                <span>Submit Request</span>
+              <button class="qa-btn" onclick="document.querySelector('[data-target=patientHistory]').click()">
+                <i class="fas fa-history"></i>
+                <span>Patient History</span>
               </button>
             </div>
           </div>
@@ -165,7 +163,7 @@
               <input type="hidden" id="recordApptId">
               <input type="hidden" id="recordPatientId">
               <div class="form-group">
-                <label>Diagnosis</label>
+                <label>Diagnosis *</label>
                 <textarea id="recordDiagnosis" class="form-control" rows="2" placeholder="Enter diagnosis…" required></textarea>
               </div>
               <div class="form-group">
@@ -186,25 +184,38 @@
       <div id="addRecord" class="tab-content">
         <div class="page-header">
           <h2><i class="fas fa-notes-medical"></i> Add Medical Record</h2>
+          <p>Search a patient and add their diagnosis, prescription and notes</p>
         </div>
         <div class="card form-card">
           <div class="card-body">
             <form id="recordForm2">
+              <!-- Patient search within Add Record tab -->
               <div class="form-group">
-                <label>Patient User ID</label>
-                <input type="number" id="rec2PatientId" class="form-control" placeholder="Patient's system ID" required>
+                <label>Search Patient (by name or ID)</label>
+                <div style="position:relative">
+                  <input type="text" id="rec2PatientSearch" class="form-control" placeholder="Type patient name or ID…" autocomplete="off">
+                  <div id="rec2PatientDropdown" style="display:none;position:absolute;width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;z-index:100;max-height:200px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.15)"></div>
+                </div>
+              </div>
+              <input type="hidden" id="rec2PatientId">
+              <div id="rec2PatientInfo" class="form-group" style="display:none">
+                <div class="stat-card stat-blue" style="padding:.75rem 1rem;margin:0">
+                  <i class="fas fa-user-check" style="color:var(--primary)"></i>
+                  <strong id="rec2PatientNameDisplay"></strong>
+                  <small id="rec2PatientEmailDisplay" style="color:var(--text-muted);margin-left:.5rem"></small>
+                </div>
               </div>
               <div class="form-group">
-                <label>Diagnosis</label>
-                <textarea id="rec2Diagnosis" class="form-control" rows="3" required></textarea>
+                <label>Diagnosis *</label>
+                <textarea id="rec2Diagnosis" class="form-control" rows="3" placeholder="Enter diagnosis…" required></textarea>
               </div>
               <div class="form-group">
                 <label>Prescription</label>
-                <textarea id="rec2Prescription" class="form-control" rows="3"></textarea>
+                <textarea id="rec2Prescription" class="form-control" rows="3" placeholder="Medications, dosage…"></textarea>
               </div>
               <div class="form-group">
                 <label>Notes</label>
-                <textarea id="rec2Notes" class="form-control" rows="2"></textarea>
+                <textarea id="rec2Notes" class="form-control" rows="2" placeholder="Additional notes…"></textarea>
               </div>
               <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Record</button>
             </form>
@@ -254,27 +265,60 @@
       <div id="patientHistory" class="tab-content">
         <div class="page-header">
           <h2><i class="fas fa-history"></i> Patient History</h2>
-          <p>Full appointment & medical history grouped by patient</p>
+          <p>Search any patient to view their records and history</p>
         </div>
+
+        <!-- Search bar -->
         <div class="search-bar" style="margin-bottom:1.5rem">
           <div class="search-input-wrap">
             <i class="fas fa-search"></i>
             <input type="text" id="patientHistorySearch" placeholder="Search patient by name…" autocomplete="off">
           </div>
         </div>
-        <div id="patientHistoryContainer">
-          <p class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading patient history…</p>
-        </div>
-      </div>
 
-      <!-- Calendar Tab -->
-      <div id="calendar" class="tab-content">
-        <div class="page-header">
-          <h2><i class="fas fa-calendar-alt"></i> Appointment Calendar</h2>
-          <p>Your scheduled appointments are highlighted below</p>
+        <!-- Patient list panel -->
+        <div id="patientListPanel" style="display:none" class="card" style="margin-bottom:1.5rem">
+          <div class="card-header"><span class="card-title"><i class="fas fa-users"></i> Matching Patients</span></div>
+          <div id="patientListContainer" class="card-body"></div>
         </div>
-        <div class="calendar-wrap" style="padding: 1rem; border-radius: 8px; background: var(--secondary);">
-          <div id="appointmentCalendar" class="calendar-container"></div>
+
+        <!-- Patient Detail Panel -->
+        <div id="patientDetailPanel" style="display:none">
+          <div class="card" style="margin-bottom:1.5rem">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+              <span class="card-title"><i class="fas fa-user-circle"></i> <span id="histPatientName">—</span></span>
+              <div style="display:flex;gap:.5rem;align-items:center">
+                <small id="histPatientEmail" style="color:var(--text-muted)"></small>
+                <button class="btn-icon" onclick="closePatientDetail()" title="Back to search"><i class="fas fa-arrow-left"></i> Back</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Completed appointments -->
+          <div class="card" style="margin-bottom:1.5rem">
+            <div class="card-header"><span class="card-title"><i class="fas fa-calendar-check"></i> Appointments History</span></div>
+            <div class="card-body" style="padding:0">
+              <div class="table-responsive">
+                <table>
+                  <thead><tr><th>#ID</th><th>Date</th><th>Time</th><th>Doctor</th><th>Specialization</th></tr></thead>
+                  <tbody id="histApptsTbody"><tr><td colspan="5" class="empty-state">Loading…</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical records -->
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="fas fa-file-medical"></i> Medical Records</span></div>
+            <div id="histRecordsContainer" class="card-body">
+              <p class="empty-state">Loading…</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Default empty state -->
+        <div id="patientHistoryContainer">
+          <p class="empty-state"><i class="fas fa-search"></i> Search for a patient to view their history</p>
         </div>
       </div>
 
@@ -288,29 +332,6 @@
   <script src="../js/shared.js"></script>
   <script src="../js/doctor.js"></script>
   <script>
-    // Secondary record form handler (Add Record tab)
-    document.getElementById('recordForm2')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const user = getCurrentUser();
-      if (!user) return;
-      toggleLoader(true);
-      try {
-        await RecordAPI.create({
-          patient_id: parseInt(document.getElementById('rec2PatientId').value),
-          doctor_id: user._doctorId || user.doctor_id,
-          diagnosis: document.getElementById('rec2Diagnosis').value,
-          prescription: document.getElementById('rec2Prescription').value,
-          notes: document.getElementById('rec2Notes').value
-        });
-        showToast('Record saved!', 'success');
-        document.getElementById('recordForm2').reset();
-      } catch (err) {
-        showToast(err.message || 'Failed to save', 'error');
-      } finally {
-        toggleLoader(false);
-      }
-    });
-
     // Mark all read
     document.getElementById('markAllRead')?.addEventListener('click', async () => {
       const user = getCurrentUser();

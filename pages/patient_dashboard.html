@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patient Dashboard — CityCare Hospital</title>
+  <meta name="description" content="CityCare Hospital Patient Dashboard – book appointments and view medical records.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="../css/style.css">
@@ -31,9 +32,6 @@
       </a>
       <a href="#" class="sidebar-link tab-btn" data-target="myReports" id="tabReports">
         <i class="fas fa-folder-open"></i> <span>My Reports</span>
-      </a>
-      <a href="#" class="sidebar-link tab-btn" data-target="calendar" id="tabCal">
-        <i class="fas fa-calendar-alt"></i> <span>Calendar</span>
       </a>
     </nav>
     <div class="sidebar-footer">
@@ -275,9 +273,10 @@
       <div id="records" class="tab-content">
         <div class="page-header">
           <h2><i class="fas fa-file-medical"></i> Medical Records</h2>
+          <p>Your latest medical records from doctors</p>
         </div>
         <div id="medicalRecordsContainer">
-          <p class="empty-state">Loading records…</p>
+          <p class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading records…</p>
         </div>
 
         <!-- Upload Report Section -->
@@ -314,17 +313,6 @@
         </div>
       </div>
 
-      <!-- Calendar Tab -->
-      <div id="calendar" class="tab-content">
-        <div class="page-header">
-          <h2><i class="fas fa-calendar-alt"></i> Appointment Calendar</h2>
-          <p>Your upcoming appointments are highlighted below</p>
-        </div>
-        <div class="calendar-wrap" style="padding: 1rem; border-radius: 8px; background: var(--secondary);">
-          <div id="appointmentCalendar" class="calendar-container"></div>
-        </div>
-      </div>
-
     </div><!-- end page-content -->
   </main>
 
@@ -343,6 +331,12 @@
       });
       const user = getCurrentUser();
       if (user) renderPatientAppointments(user);
+    });
+
+    // Reload records when switching to Medical Records tab
+    document.querySelector('[data-target="records"]')?.addEventListener('click', () => {
+      const user = getCurrentUser();
+      if (user) renderMedicalRecords(user);
     });
   </script>
 </body>

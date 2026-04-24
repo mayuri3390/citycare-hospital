@@ -156,20 +156,13 @@ function updateNotificationBell() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initDB();
-  initTheme();
-  updateNotificationBell();
-
-  // Theme toggle
-  document.querySelectorAll('.theme-toggle').forEach(btn => {
-    btn.addEventListener('click', toggleTheme);
-  });
+  initTheme();  // Apply saved theme on load
 
   // Sidebar mobile toggle
   const menuToggle = document.querySelector('.menu-toggle');
   const sidebar = document.querySelector('.sidebar');
   if (menuToggle && sidebar) {
     menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
-    // Close sidebar when clicking outside on mobile
     document.addEventListener('click', e => {
       if (window.innerWidth <= 992 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
         sidebar.classList.remove('active');
@@ -177,11 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Sidebar overlay click on mobile
+  // Sidebar overlay — close sidebar on mobile
   const overlay = document.getElementById('sidebarOverlay');
   if (overlay) {
-    overlay.addEventListener('click', () => {
-      sidebar?.classList.remove('active');
-    });
+    overlay.addEventListener('click', () => sidebar?.classList.remove('active'));
   }
 });
+

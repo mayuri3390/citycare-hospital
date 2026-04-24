@@ -184,3 +184,58 @@ const DoctorRequestAPI = {
     });
   }
 };
+
+// ── Patients (doctor/receptionist use) ────────────────────────────────────────
+
+const PatientAPI = {
+  /**
+   * Search patients who have at least one completed appointment.
+   * @param {string} name  Optional name query
+   */
+  search(name = '') {
+    const qs = name ? `?search=${encodeURIComponent(name)}` : '';
+    return apiFetch(`/patients${qs}`);
+  },
+
+  /**
+   * Full patient history: completed appointments + medical records.
+   * @param {number} patientId
+   */
+  getHistory(patientId) {
+    return apiFetch(`/patients/${patientId}/history`);
+  }
+};
+
+// ── Billing ───────────────────────────────────────────────────────────────────
+
+const BillingAPI = {
+  /**
+   * Create a bill. payload: { patient_id, doctor_id, amount, details }
+   */
+  createBill(payload) {
+    return apiFetch('/bills', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  /** Get all bills (receptionist/doctor). */
+  getBills() {
+    return apiFetch('/bills');
+  },
+
+  /** Get bills for a specific patient. */
+  getForPatient(patientId) {
+    return apiFetch(`/bills/patient/${patientId}`);
+  }
+};
+
+// ── Utility: debounce ─────────────────────────────────────────────────────────
+
+function debounce(fn, delay = 300) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}

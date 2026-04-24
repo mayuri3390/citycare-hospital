@@ -38,8 +38,8 @@ window.updateApptStatus = async function (id, status) {
   } finally {
     toggleLoader(false);
     const user = getCurrentUser();
-    if (user?.role === 'patient') renderPatientAppointments(user);
-    else if (user?.role === 'doctor') { renderDoctorAppointments(user); renderDoctorStats(user); }
+    if (user?.role === 'patient')      renderPatientAppointments(user);
+    else if (user?.role === 'doctor')  { renderDoctorAppointments(user); renderDoctorStats(user); }
     else if (user?.role === 'receptionist') { renderAllAppointments(); renderReceptionistStats(); }
   }
 };
@@ -239,8 +239,46 @@ function _showCalendarPopup(date, appts, target) {
   popup.style.left = `${Math.min(rect.left, window.innerWidth - 260)}px`;
 }
 
-//  NOTIFICATION PANEL TOGGLE
+//  NOTIFICATION PANEL TOGGLE & LOGIC
 // ═══════════════════════════════════════════════════════════
+
+window.setupPatientNotifications = async function(user) {
+  try {
+    const res = await NotificationAPI.get(user.id);
+    const data = res.data || {};
+    const notifications = data.notifications || [];
+    const unread_count = data.unread_count || 0;
+    _updateNotifBell(unread_count);
+    _renderNotifList(notifications);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+function _updateNotifBell(count) {
+  const badge = document.getElementById('notif-badge');
+  if (!badge) return;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+function _renderNotifList(notifs) {
+  const list = document.getElementById('notifList');
+  if (!list) return;
+  if (notifs.length === 0) {
+    list.innerHTML = '<p class="empty-state">No notifications</p>';
+    return;
+  }
+  list.innerHTML = notifs.map(n => `
+    <div class="notif-item ${n.is_read ? 'read' : 'unread'}" data-id="${n.id}">
+      <i class="fas fa-bell notif-icon"></i>
+      <div>
+        <p>${n.message}</p>
+        <small>${formatDate(n.created_at)}</small>
+      </div>
+    </div>
+  `).join('');
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const bell = document.querySelector('.notification-bell');

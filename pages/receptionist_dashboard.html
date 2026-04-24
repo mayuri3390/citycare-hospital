@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Receptionist Dashboard — CityCare Hospital</title>
+  <meta name="description" content="CityCare Hospital Receptionist Dashboard – manage appointments, billing and doctor requests.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="../css/style.css">
@@ -22,11 +23,14 @@
       <a href="#" class="sidebar-link tab-btn" data-target="allAppointments">
         <i class="fas fa-calendar-alt"></i> <span>All Appointments</span>
       </a>
-      <a href="#" class="sidebar-link tab-btn" data-target="drRequestsMgmt">
-        <i class="fas fa-clipboard-list"></i> <span>Doctor Requests</span>
-      </a>
       <a href="#" class="sidebar-link tab-btn" data-target="rescheduleTab">
         <i class="fas fa-calendar-check"></i> <span>Reschedule Appts</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="billingTab">
+        <i class="fas fa-file-invoice-dollar"></i> <span>Billing</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="drRequestsMgmt">
+        <i class="fas fa-clipboard-list"></i> <span>Doctor Requests</span>
       </a>
       <a href="#" class="sidebar-link tab-btn" data-target="pendingDoctorsTab">
         <i class="fas fa-user-md"></i> <span>Pending Doctors</span>
@@ -103,6 +107,9 @@
             <button class="qa-btn" onclick="document.querySelector('[data-target=rescheduleTab]').click()">
               <i class="fas fa-retweet"></i><span>Reschedule</span>
             </button>
+            <button class="qa-btn" onclick="document.querySelector('[data-target=billingTab]').click()">
+              <i class="fas fa-file-invoice-dollar"></i><span>Create Bill</span>
+            </button>
             <button class="qa-btn" onclick="document.querySelector('[data-target=drRequestsMgmt]').click()">
               <i class="fas fa-clipboard-check"></i><span>Doctor Requests</span>
             </button>
@@ -165,16 +172,6 @@
         </div>
       </div>
 
-      <!-- Doctor Requests Management Tab -->
-      <div id="drRequestsMgmt" class="tab-content">
-        <div class="page-header">
-          <h2><i class="fas fa-clipboard-list"></i> Doctor Requests</h2>
-        </div>
-        <div id="drRequestsList">
-          <p class="empty-state">Loading requests…</p>
-        </div>
-      </div>
-
       <!-- Reschedule Appointments Tab -->
       <div id="rescheduleTab" class="tab-content">
         <div class="page-header">
@@ -220,6 +217,114 @@
               </table>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Billing Tab (NEW) -->
+      <div id="billingTab" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-file-invoice-dollar"></i> Billing</h2>
+          <p>Generate bills for patients</p>
+        </div>
+
+        <div class="two-col-grid">
+
+          <!-- Create Bill Form -->
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="fas fa-plus-circle"></i> Create Bill</span></div>
+            <div class="card-body">
+              <form id="createBillForm">
+                <!-- Patient search -->
+                <div class="form-group">
+                  <label>Search Patient (by name or ID)</label>
+                  <div style="position:relative">
+                    <input type="text" id="billPatientSearch" class="form-control"
+                           placeholder="Type patient name or ID…" autocomplete="off">
+                    <div id="billPatientDropdown"
+                         style="display:none;position:absolute;width:100%;background:var(--card-bg);
+                                border:1px solid var(--border);border-radius:8px;z-index:200;
+                                max-height:200px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.2)">
+                    </div>
+                  </div>
+                </div>
+                <input type="hidden" id="billPatientId">
+                <div id="billPatientInfo" style="display:none" class="form-group">
+                  <div style="background:var(--secondary);border-radius:8px;padding:.75rem 1rem;
+                              display:flex;align-items:center;gap:.75rem">
+                    <i class="fas fa-user-check" style="color:var(--primary)"></i>
+                    <div>
+                      <strong id="billPatientNameDisplay"></strong>
+                      <small id="billPatientEmailDisplay" style="color:var(--text-muted);display:block"></small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Doctor dropdown (populated from API) -->
+                <div class="form-group">
+                  <label>Doctor</label>
+                  <select id="billDoctorId" class="form-control" required>
+                    <option value="">Select Doctor</option>
+                  </select>
+                </div>
+
+                <!-- Fee fields -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Consultation Fee (₹)</label>
+                    <input type="number" id="billConsultFee" class="form-control"
+                           placeholder="500" min="0" step="0.01" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Extra Charges (₹)</label>
+                    <input type="number" id="billExtraCharges" class="form-control"
+                           placeholder="0" min="0" step="0.01" value="0">
+                  </div>
+                </div>
+
+                <!-- Auto-calculated total -->
+                <div class="form-group">
+                  <label>Total Amount (₹)</label>
+                  <input type="text" id="billTotal" class="form-control"
+                         placeholder="Auto-calculated" readonly
+                         style="background:var(--secondary);font-weight:700;color:var(--primary)">
+                </div>
+
+                <div class="form-group">
+                  <label>Details / Notes</label>
+                  <textarea id="billDetails" class="form-control" rows="2"
+                            placeholder="e.g. Consultation + Blood test…"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="createBillBtn">
+                  <i class="fas fa-file-invoice"></i> Generate Bill
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Bills List -->
+          <div class="card">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+              <span class="card-title"><i class="fas fa-list"></i> Generated Bills</span>
+              <button class="btn-sm btn-outline" id="refreshBillsBtn">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+            <div id="billsListContainer" class="card-body">
+              <p class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading bills…</p>
+            </div>
+          </div>
+
+        </div><!-- end two-col-grid -->
+      </div>
+
+      <!-- Doctor Requests Management Tab -->
+      <div id="drRequestsMgmt" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-clipboard-list"></i> Doctor Requests</h2>
+        </div>
+        <div id="drRequestsList">
+          <p class="empty-state">Loading requests…</p>
         </div>
       </div>
 

@@ -266,14 +266,33 @@
   <script>
     // Redirect logged-in users to their dashboard
     document.addEventListener('DOMContentLoaded', () => {
-      const user = JSON.parse(localStorage.getItem('currentUser'));
-      if (user) {
-        const btns = document.getElementById('authBtns');
-        let href = 'pages/login.html';
-        if (user.role === 'patient') href = 'pages/patient_dashboard.html';
-        else if (user.role === 'doctor') href = 'pages/doctor_dashboard.html';
-        else if (user.role === 'receptionist') href = 'pages/receptionist_dashboard.html';
-        btns.innerHTML = `<a href="${href}" class="btn btn-primary"><i class="fas fa-tachometer-alt"></i> My Dashboard</a>`;
+      try {
+        const userStr = localStorage.getItem('currentUser');
+        const token = localStorage.getItem('token');
+        if (userStr && token) {
+          const user = JSON.parse(userStr);
+          const btns = document.getElementById('authBtns');
+          let href = null;
+          
+          if (user.role === 'patient') href = 'pages/patient_dashboard.html';
+          else if (user.role === 'doctor') href = 'pages/doctor_dashboard.html';
+          else if (user.role === 'receptionist') href = 'pages/receptionist_dashboard.html';
+          
+          if (href) {
+            btns.innerHTML = `<a href="${href}" class="btn btn-primary"><i class="fas fa-tachometer-alt"></i> My Dashboard</a>`;
+          } else {
+            // Invalid role, clear storage
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('token');
+          }
+        } else {
+          // Incomplete login state
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('token');
+        }
+      } catch (e) {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
       }
 
       // Mobile menu toggle
@@ -308,4 +327,4 @@
     });
   </script>
 </body>
-</html>
+</html>   

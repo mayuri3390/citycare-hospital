@@ -8,7 +8,6 @@ async function initPatient(user) {
   await loadDoctorsList(user);
   await renderPatientAppointments(user);
   await setupPatientNotifications(user);
-  initCalendar(user);
 
   // Book form
   const bookForm = document.getElementById('bookForm');
@@ -31,7 +30,6 @@ async function initPatient(user) {
         bookForm.reset();
         await renderPatientAppointments(user);
         await setupPatientNotifications(user);
-        initCalendar(user); // Refresh calendar dots
         document.querySelector('[data-target="appointments"]')?.click();
       } catch (error) {
     console.error(error);
@@ -212,7 +210,6 @@ async function renderPatientAppointments(user) {
 
     const res = await AppointmentAPI.getForUser(user.id, filters);
     _renderApptRows(tbody, res.data || [], 'patient');
-    _populateCalendarDots(res.data || []);
   } catch (error) {
     console.error(error);
     showToast(error.message || 'Server connection failed', 'error');
@@ -283,42 +280,7 @@ function _renderApptRows(tbody, appts, role) {
   }).join('');
 }
 
-async function setupPatientNotifications(user) {
-  try {
-    const res = await NotificationAPI.get(user.id);
-    const { notifications, unread_count } = res.data;
-    _updateNotifBell(unread_count);
-    _renderNotifList(notifications || []);
-  } catch (error) {
-    console.error(error);
-    showToast(error.message || 'Server connection failed', 'error');
-  }
-}
 
-function _updateNotifBell(count) {
-  const badge = document.getElementById('notif-badge');
-  if (!badge) return;
-  badge.textContent = count;
-  badge.style.display = count > 0 ? 'flex' : 'none';
-}
-
-function _renderNotifList(notifs) {
-  const list = document.getElementById('notifList');
-  if (!list) return;
-  if (notifs.length === 0) {
-    list.innerHTML = '<p class="empty-state">No notifications</p>';
-    return;
-  }
-  list.innerHTML = notifs.map(n => `
-    <div class="notif-item ${n.is_read ? 'read' : 'unread'}" data-id="${n.id}">
-      <i class="fas fa-bell notif-icon"></i>
-      <div>
-        <p>${n.message}</p>
-        <small>${formatDate(n.created_at)}</small>
-      </div>
-    </div>
-  `).join('');
-}
 
 async function renderMedicalRecords(user) {
   const container = document.getElementById('medicalRecordsContainer');

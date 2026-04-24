@@ -21,7 +21,22 @@ CREATE TABLE IF NOT EXISTS login_logs (
     INDEX idx_ll_time (login_time)
 );
 
--- 3. Sample: verify migration worked
+-- 4. Create bills table (NEW — Receptionist Billing Feature)
+CREATE TABLE IF NOT EXISTS bills (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id  INT NOT NULL,
+    amount     DECIMAL(10,2) NOT NULL,
+    details    TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (doctor_id)  REFERENCES doctors(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    INDEX idx_bill_patient (patient_id),
+    INDEX idx_bill_doctor  (doctor_id),
+    INDEX idx_bill_date    (created_at)
+);
+
+-- 5. Verify all tables
 SELECT 'Migration applied successfully' AS status;
 SELECT TABLE_NAME FROM information_schema.TABLES
 WHERE TABLE_SCHEMA = 'citycare_db'
