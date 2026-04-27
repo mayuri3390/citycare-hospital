@@ -98,3 +98,50 @@ def approve_doctor(user_id, current_user):
     finally:
         cursor.close()
         conn.close()
+
+@doctors_bp.route('/<int:doctor_id>/availability', methods=['PUT'])
+@token_required
+@role_required('receptionist', 'doctor')
+def update_doctor_availability(doctor_id, current_user):
+    data = request.get_json(silent=True) or {}
+    date = data.get('date')
+    status = data.get('status')
+
+    if not date or status not in ['available', 'unavailable']:
+        return error('Valid date and status (available/unavailable) are required')
+
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Update or insert availability
+        cursor.execute(
+            """INSERT INTO doctor_availability (doctor_id, date, status) 
+               VALUES (%s, %s, %s)
+               ON DUPLICATE KEY UPDATE status = %s""",
+            (doctor_id, date, status, status)
+        )
+
+        # If marking unavailable, find all appointments on that date and mark them 'cancelled' or add note
+        if status == 'unavailable':
+            cursor.execute(
+                "SELECT id, patient_id FROM appointments WHERE doctor_id = %s AND date = %s AND status IN ('pending', 'confirmed')",
+                (doctor_id, date)
+            )
+            affected_appts = cursor.fetchall()
+            
+            for appt in affected_appts:
+                cursor.execute(
+                    "UPDATE appointments SET status = 'cancelled', notes = 'Doctor emergency leave. Reschedule required.' WHERE id = %s",
+                    (appt['id'],)
+                )
+                from routes.appointment_routes import _notify
+                _notify(cursor, conn, appt['patient_id'], f"Your appointment on {date} was cancelled due to doctor emergency leave. Please reschedule.")
+
+        conn.commit()
+        return success(message=f"Doctor marked as {status} on {date}")
+    except Exception as e:
+        conn.rollback()
+        return error(str(e), 500)
+    finally:
+        cursor.close()
+        conn.close()

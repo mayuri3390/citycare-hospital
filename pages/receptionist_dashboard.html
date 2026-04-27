@@ -35,6 +35,12 @@
       <a href="#" class="sidebar-link tab-btn" data-target="pendingDoctorsTab">
         <i class="fas fa-user-md"></i> <span>Pending Doctors</span>
       </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="manualAppointmentTab">
+        <i class="fas fa-calendar-plus"></i> <span>Manual Appointment</span>
+      </a>
+      <a href="#" class="sidebar-link tab-btn" data-target="doctorAvailabilityTab">
+        <i class="fas fa-user-slash"></i> <span>Doctor Availability</span>
+      </a>
     </nav>
     <div class="sidebar-footer">
       <a href="#" id="logoutBtn" class="sidebar-link logout-link">
@@ -259,13 +265,14 @@
                   </div>
                 </div>
 
-                <!-- Doctor dropdown (populated from API) -->
+                <!-- Completed Appointment dropdown (populated based on selected patient) -->
                 <div class="form-group">
-                  <label>Doctor</label>
-                  <select id="billDoctorId" class="form-control" required>
-                    <option value="">Select Doctor</option>
+                  <label>Completed Appointment</label>
+                  <select id="billAppointmentId" class="form-control" required>
+                    <option value="">Select Appointment</option>
                   </select>
                 </div>
+                <input type="hidden" id="billDoctorId">
 
                 <!-- Fee fields -->
                 <div class="form-row">
@@ -350,6 +357,130 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Appointment Tab -->
+      <div id="manualAppointmentTab" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-calendar-plus"></i> Manual Appointment</h2>
+          <p>Create an appointment manually for a patient</p>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <form id="manualApptForm">
+              <div class="form-group">
+                <label>Patient Type</label>
+                <div class="patient-type-toggle" style="display:flex;gap:1rem;margin-bottom:1rem">
+                  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+                    <input type="radio" name="patientType" value="existing" checked> Existing Patient
+                  </label>
+                  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+                    <input type="radio" name="patientType" value="new"> New Patient
+                  </label>
+                </div>
+              </div>
+
+              <!-- Existing Patient Search -->
+              <div id="existingPatientSection">
+                <div class="form-group">
+                  <label>Search Patient (by name or ID)</label>
+                  <div style="position:relative">
+                    <input type="text" id="manualApptPatientSearch" class="form-control"
+                           placeholder="Type patient name or ID…" autocomplete="off">
+                    <div id="manualApptPatientDropdown"
+                         style="display:none;position:absolute;width:100%;background:var(--card-bg);
+                                border:1px solid var(--border);border-radius:8px;z-index:200;
+                                max-height:200px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.2)">
+                    </div>
+                  </div>
+                </div>
+                <input type="hidden" id="manualApptPatientId">
+                <div id="manualApptPatientInfo" style="display:none" class="form-group">
+                  <div style="background:var(--secondary);border-radius:8px;padding:.75rem 1rem;
+                              display:flex;align-items:center;gap:.75rem">
+                    <i class="fas fa-user-check" style="color:var(--primary)"></i>
+                    <div>
+                      <strong id="manualApptPatientNameDisplay"></strong>
+                      <small id="manualApptPatientEmailDisplay" style="color:var(--text-muted);display:block"></small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- New Patient Fields -->
+              <div id="newPatientSection" style="display:none">
+                <div class="two-col-grid" style="grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+                  <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="newPatientName" class="form-control" placeholder="Enter full name">
+                  </div>
+                  <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="newPatientEmail" class="form-control" placeholder="Enter email address">
+                  </div>
+                </div>
+                <div class="two-col-grid" style="grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+                  <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="newPatientPhone" class="form-control" placeholder="Enter phone number">
+                  </div>
+                  <div class="form-group">
+                    <label>Default Password</label>
+                    <input type="text" id="newPatientPass" class="form-control" value="CityCare123" readonly>
+                    <small style="color:var(--text-muted)">Patient can change this after login</small>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Doctor</label>
+                <select id="manualApptDoctorId" class="form-control" required>
+                   <option value="">Select Doctor</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="manualApptDate" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label>Time</label>
+                <input type="time" id="manualApptTime" class="form-control" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Create Appointment</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor Availability Tab -->
+      <div id="doctorAvailabilityTab" class="tab-content">
+        <div class="page-header">
+          <h2><i class="fas fa-user-slash"></i> Doctor Availability</h2>
+          <p>Mark doctor on emergency leave</p>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <form id="doctorAvailForm">
+              <div class="form-group">
+                <label>Doctor</label>
+                <select id="availDoctorId" class="form-control" required>
+                   <option value="">Select Doctor</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="availDate" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="availStatus" class="form-control" required>
+                   <option value="unavailable">Unavailable (Emergency Leave)</option>
+                   <option value="available">Available</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-danger">Update Availability</button>
+            </form>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 """Appointment routes."""
 from flask import Blueprint, request
+import bcrypt
 from config.db import get_db
 from utils.helpers import success, error, token_required, role_required
 
@@ -33,6 +34,14 @@ def book_appointment(current_user):
         if not doctor:
             return error('Doctor not found', 404)
 
+        # Check if slot is already booked (PART 1)
+        cursor.execute(
+            "SELECT id FROM appointments WHERE doctor_id = %s AND date = %s AND time = %s AND status != 'cancelled'",
+            (doctor_id, date, time)
+        )
+        if cursor.fetchone():
+            return error("Slot already booked", 400)
+
         cursor.execute(
             """INSERT INTO appointments (patient_id, doctor_id, date, time)
                VALUES (%s, %s, %s, %s)""",
@@ -50,6 +59,81 @@ def book_appointment(current_user):
 
         conn.commit()
         return success({'appointment_id': appt_id}, 'Appointment booked successfully', 201)
+    except Exception as e:
+        conn.rollback()
+        return error(str(e), 500)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@appointments_bp.route('/manual', methods=['POST'])
+@token_required
+@role_required('receptionist')
+def book_manual_appointment(current_user):
+    data = request.get_json(silent=True) or {}
+    patient_id = data.get('patient_id')
+    
+    # New patient info
+    patient_name = data.get('patient_name')
+    patient_email = data.get('patient_email')
+    patient_password = data.get('patient_password') or 'CityCare123'
+    
+    doctor_id = data.get('doctor_id')
+    date = data.get('date')
+    time = data.get('time')
+
+    if not all([doctor_id, date, time]):
+        return error('doctor_id, date and time are required')
+
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Handle New Patient Creation if no patient_id
+        if not patient_id:
+            if not all([patient_name, patient_email]):
+                return error('Patient ID or new patient details (name, email) are required')
+            
+            # Check if email exists
+            cursor.execute("SELECT id FROM users WHERE email = %s", (patient_email.lower(),))
+            existing = cursor.fetchone()
+            if existing:
+                patient_id = existing['id']
+            else:
+                # Register new patient
+                hashed = bcrypt.hashpw(patient_password.encode(), bcrypt.gensalt()).decode()
+                cursor.execute(
+                    "INSERT INTO users (name, email, password, role, is_approved) VALUES (%s,%s,%s,%s,%s)",
+                    (patient_name, patient_email.lower(), hashed, 'patient', True)
+                )
+                patient_id = cursor.lastrowid
+        else:
+            # Validate existing patient
+            cursor.execute("SELECT id FROM users WHERE id = %s AND role = 'patient'", (patient_id,))
+            if not cursor.fetchone():
+                return error('Patient not found', 404)
+
+        # Validate doctor
+        cursor.execute("SELECT id FROM doctors WHERE id = %s", (doctor_id,))
+        if not cursor.fetchone():
+            return error('Doctor not found', 404)
+
+        # Check if slot is already booked
+        cursor.execute(
+            "SELECT id FROM appointments WHERE doctor_id = %s AND date = %s AND time = %s AND status != 'cancelled'",
+            (doctor_id, date, time)
+        )
+        if cursor.fetchone():
+            return error("Slot already booked", 400)
+
+        cursor.execute(
+            """INSERT INTO appointments (patient_id, doctor_id, date, time)
+               VALUES (%s, %s, %s, %s)""",
+            (patient_id, doctor_id, date, time)
+        )
+        appt_id = cursor.lastrowid
+        conn.commit()
+        return success({'appointment_id': appt_id, 'patient_id': patient_id}, 'Manual appointment booked successfully', 201)
     except Exception as e:
         conn.rollback()
         return error(str(e), 500)

@@ -34,6 +34,175 @@ async function initReceptionist(user) {
   document.querySelector('[data-target="billingTab"]')?.addEventListener('click', () => {
     if (!billingLoaded) { billingLoaded = true; _initBillingTab(); }
   });
+
+  // Manual Appointment and Doctor Availability tabs
+  _initManualApptTab();
+  _initDoctorAvailTab();
+}
+
+// ─── Manual Appointments & Availability ───────────────────────────────────────
+
+async function _initManualApptTab() {
+  _populateDoctorDropdown('manualApptDoctorId');
+
+  // Wire patient search with debounce
+  _wirePatientSearchForManualAppt();
+
+  const form = document.getElementById('manualApptForm');
+  if (!form) return;
+
+  // Toggle Existing vs New Patient
+  const radios = form.querySelectorAll('input[name="patientType"]');
+  const existingSection = document.getElementById('existingPatientSection');
+  const newSection = document.getElementById('newPatientSection');
+
+  radios.forEach(r => {
+    r.addEventListener('change', () => {
+      if (r.value === 'new') {
+        existingSection.style.display = 'none';
+        newSection.style.display = 'block';
+      } else {
+        existingSection.style.display = 'block';
+        newSection.style.display = 'none';
+      }
+    });
+  });
+
+  if (form && !form.dataset.initialized) {
+    form.dataset.initialized = 'true';
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      
+      const patientType = form.querySelector('input[name="patientType"]:checked').value;
+      const payload = {
+        doctor_id: parseInt(document.getElementById('manualApptDoctorId').value),
+        date: document.getElementById('manualApptDate').value,
+        time: document.getElementById('manualApptTime').value
+      };
+
+      if (patientType === 'existing') {
+        payload.patient_id = parseInt(document.getElementById('manualApptPatientId').value);
+        if (!payload.patient_id || isNaN(payload.patient_id)) {
+          showToast('Please select a valid patient from the search dropdown.', 'error');
+          return;
+        }
+      } else {
+        payload.patient_name = document.getElementById('newPatientName').value.trim();
+        payload.patient_email = document.getElementById('newPatientEmail').value.trim();
+        payload.patient_phone = document.getElementById('newPatientPhone').value.trim();
+        if (!payload.patient_name || !payload.patient_email) {
+          showToast('Please enter name and email for the new patient.', 'error');
+          return;
+        }
+      }
+
+      if (!payload.doctor_id || isNaN(payload.doctor_id)) {
+        showToast('Please select a doctor.', 'error');
+        return;
+      }
+
+      toggleLoader(true);
+      try {
+        await AppointmentAPI.bookManual(payload);
+        showToast('Manual appointment booked!', 'success');
+        
+        // Reset form and UI
+        form.reset();
+        document.getElementById('manualApptPatientId').value = '';
+        document.getElementById('manualApptPatientSearch').value = '';
+        document.getElementById('manualApptPatientInfo').style.display = 'none';
+        existingSection.style.display = 'block';
+        newSection.style.display = 'none';
+        
+        await renderAllAppointments();
+      } catch (err) {
+        showToast(err.message || 'Failed to book appointment', 'error');
+      } finally {
+        toggleLoader(false);
+      }
+    });
+  }
+}
+
+function _wirePatientSearchForManualAppt() {
+  const searchInput = document.getElementById('manualApptPatientSearch');
+  const dropdown    = document.getElementById('manualApptPatientDropdown');
+  const hiddenId    = document.getElementById('manualApptPatientId');
+  const infoBox     = document.getElementById('manualApptPatientInfo');
+  const nameDisplay = document.getElementById('manualApptPatientNameDisplay');
+  const emailDisplay= document.getElementById('manualApptPatientEmailDisplay');
+  if (!searchInput || !dropdown) return;
+
+  const doSearch = debounce(async () => {
+    const q = searchInput.value.trim();
+    if (q.length < 2) { dropdown.style.display = 'none'; return; }
+    try {
+      const res = await PatientAPI.search(q);
+      const patients = res.data || [];
+      if (patients.length === 0) {
+        dropdown.innerHTML = '<div style="padding:.75rem 1rem;color:var(--text-muted)">No matching patients found</div>';
+      } else {
+        dropdown.innerHTML = patients.map(p => `
+          <div class="patient-option"
+               data-id="${p.id}" data-name="${p.name}" data-email="${p.email || ''}"
+               style="padding:.65rem 1rem;cursor:pointer;border-bottom:1px solid var(--border);transition:background .2s"
+               onmouseover="this.style.background='var(--secondary)'"
+               onmouseout="this.style.background=''">
+            <i class="fas fa-user-circle" style="color:var(--primary);margin-right:.4rem"></i>
+            <strong>${p.name}</strong>
+            <small style="color:var(--text-muted);margin-left:.5rem">${p.email || ''}</small>
+          </div>`).join('');
+      }
+      dropdown.style.display = 'block';
+
+      dropdown.querySelectorAll('.patient-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          hiddenId.value             = opt.dataset.id;
+          searchInput.value          = opt.dataset.name;
+          nameDisplay.textContent    = opt.dataset.name;
+          emailDisplay.textContent   = opt.dataset.email;
+          infoBox.style.display      = 'flex';
+          dropdown.style.display     = 'none';
+        });
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, 300);
+
+  searchInput.addEventListener('input', doSearch);
+  document.addEventListener('click', e => {
+    if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+}
+
+async function _initDoctorAvailTab() {
+  _populateDoctorDropdown('availDoctorId');
+
+  const form = document.getElementById('doctorAvailForm');
+  if (form && !form.dataset.initialized) {
+    form.dataset.initialized = 'true';
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const doctorId = document.getElementById('availDoctorId').value;
+      const payload = {
+        date: document.getElementById('availDate').value,
+        status: document.getElementById('availStatus').value
+      };
+      toggleLoader(true);
+      try {
+        await DoctorAPI.updateAvailability(doctorId, payload);
+        showToast('Doctor availability updated!', 'success');
+        form.reset();
+      } catch (err) {
+        showToast(err.message || 'Failed to update availability', 'error');
+      } finally {
+        toggleLoader(false);
+      }
+    });
+  }
 }
 
 // ─── All Appointments ─────────────────────────────────────────────────────────
@@ -282,19 +451,6 @@ window.approveDoctor = async function(userId) {
 // ═══════════════════════════════════════════════════════════
 
 async function _initBillingTab() {
-  // Load doctor list into dropdown
-  try {
-    const res = await DoctorAPI.getAll();
-    const doctors = res.data || [];
-    const sel = document.getElementById('billDoctorId');
-    if (sel) {
-      sel.innerHTML = '<option value="">Select Doctor</option>' +
-        doctors.map(d => `<option value="${d.id}">${d.name} (${d.specialization})</option>`).join('');
-    }
-  } catch (err) {
-    console.error(err);
-  }
-
   // Wire patient search with debounce
   _wirePatientSearchForBilling();
 
@@ -363,6 +519,9 @@ function _wirePatientSearchForBilling() {
           emailDisplay.textContent   = opt.dataset.email;
           infoBox.style.display      = 'flex';
           dropdown.style.display     = 'none';
+
+          // Fetch completed appointments for this patient
+          _loadCompletedAppointments(opt.dataset.id);
         });
       });
     } catch (err) {
@@ -378,9 +537,38 @@ function _wirePatientSearchForBilling() {
   });
 }
 
+async function _loadCompletedAppointments(patientId) {
+  const sel = document.getElementById('billAppointmentId');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Loading...</option>';
+  try {
+    const res = await AppointmentAPI.getForUser(patientId);
+    const completedAppts = (res.data || []).filter(a => a.status === 'completed');
+    if (completedAppts.length === 0) {
+      sel.innerHTML = '<option value="">No completed appointments</option>';
+    } else {
+      sel.innerHTML = '<option value="">Select Appointment</option>' +
+        completedAppts.map(a => `<option value="${a.id}" data-doctorid="${a.doctor_id}">#${a.id} - ${a.date} with ${a.doctor_name}</option>`).join('');
+    }
+
+    sel.addEventListener('change', (e) => {
+      const option = e.target.options[e.target.selectedIndex];
+      if (option && option.dataset.doctorid) {
+        document.getElementById('billDoctorId').value = option.dataset.doctorid;
+      } else {
+        document.getElementById('billDoctorId').value = '';
+      }
+    });
+
+  } catch (err) {
+    sel.innerHTML = '<option value="">Failed to load</option>';
+  }
+}
+
 async function _handleCreateBill(e) {
   e.preventDefault();
   const patientId   = document.getElementById('billPatientId')?.value;
+  const appointmentId = document.getElementById('billAppointmentId')?.value;
   const doctorId    = document.getElementById('billDoctorId')?.value;
   const consultFee  = parseFloat(document.getElementById('billConsultFee')?.value || '0') || 0;
   const extraCharges= parseFloat(document.getElementById('billExtraCharges')?.value || '0') || 0;
@@ -388,7 +576,7 @@ async function _handleCreateBill(e) {
   const totalAmount = consultFee + extraCharges;
 
   if (!patientId) { showToast('Please select a patient', 'error'); return; }
-  if (!doctorId)  { showToast('Please select a doctor',  'error'); return; }
+  if (!appointmentId || !doctorId) { showToast('Please select a completed appointment', 'error'); return; }
   if (totalAmount <= 0) { showToast('Amount must be greater than zero', 'error'); return; }
 
   const billDetails = [
@@ -402,6 +590,7 @@ async function _handleCreateBill(e) {
     await BillingAPI.createBill({
       patient_id: parseInt(patientId),
       doctor_id:  parseInt(doctorId),
+      appointment_id: parseInt(appointmentId),
       amount:     totalAmount,
       details:    billDetails
     });
@@ -493,3 +682,30 @@ window.printBill = function(bill) {
     </body></html>`);
   win.document.close();
 };
+
+let _globalDoctorsList = null;
+
+async function _populateDoctorDropdown(elementId) {
+  if (!_globalDoctorsList) {
+    try {
+      const res = await DoctorAPI.getAll();
+      let doctors = res.data || [];
+      const seen = new Set();
+      _globalDoctorsList = doctors.filter(d => {
+        if (seen.has(d.name)) return false;
+        seen.add(d.name);
+        return true;
+      });
+    } catch (err) {
+      console.error('Failed to load doctors:', err);
+      _globalDoctorsList = [];
+    }
+  }
+
+  const sel = document.getElementById(elementId);
+  if (sel && sel.options.length <= 1) {
+    sel.innerHTML = '<option value="">Select Doctor</option>' + 
+      _globalDoctorsList.map(d => `<option value="${d.id}">${d.name} (${d.specialization || 'General'})</option>`).join('');
+  }
+}
+

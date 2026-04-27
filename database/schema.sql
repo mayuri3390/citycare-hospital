@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES users(id)   ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (doctor_id)  REFERENCES doctors(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE KEY unique_doctor_slot (doctor_id, date, time),
     INDEX idx_patient (patient_id),
     INDEX idx_doctor  (doctor_id),
     INDEX idx_date    (date),
@@ -90,14 +91,16 @@ CREATE TABLE IF NOT EXISTS medical_records (
 );
 
 CREATE TABLE IF NOT EXISTS bills (
-    id         INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL,
-    doctor_id  INT NOT NULL,
-    amount     DECIMAL(10,2) NOT NULL,
-    details    TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id     INT NOT NULL,
+    doctor_id      INT NOT NULL,
+    appointment_id INT NOT NULL,
+    amount         DECIMAL(10,2) NOT NULL,
+    details        TEXT,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES users(id)   ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (doctor_id)  REFERENCES doctors(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
     INDEX idx_bill_patient (patient_id),
     INDEX idx_bill_doctor  (doctor_id),
     INDEX idx_bill_date    (created_at)
@@ -136,6 +139,16 @@ CREATE TABLE IF NOT EXISTS login_logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_ll_user (user_id),
     INDEX idx_ll_time (login_time)
+);
+
+CREATE TABLE IF NOT EXISTS doctor_availability (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    doctor_id  INT NOT NULL,
+    date       DATE NOT NULL,
+    status     ENUM('available', 'unavailable') NOT NULL DEFAULT 'available',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_doctor_date (doctor_id, date)
 );
 
 -- ============================================================

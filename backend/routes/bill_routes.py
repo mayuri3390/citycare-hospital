@@ -14,11 +14,12 @@ def create_bill(current_user):
     data = request.get_json(silent=True) or {}
     patient_id  = data.get('patient_id')
     doctor_id   = data.get('doctor_id')
+    appointment_id = data.get('appointment_id')
     amount      = data.get('amount')
     details     = data.get('details') or ''
 
-    if not all([patient_id, doctor_id, amount]):
-        return error('patient_id, doctor_id and amount are required')
+    if not all([patient_id, doctor_id, appointment_id, amount]):
+        return error('patient_id, doctor_id, appointment_id and amount are required')
 
     try:
         amount = float(amount)
@@ -30,10 +31,19 @@ def create_bill(current_user):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
+        # Check if appointment is completed
+        cursor.execute("SELECT status FROM appointments WHERE id = %s AND patient_id = %s AND doctor_id = %s", 
+                       (appointment_id, patient_id, doctor_id))
+        appt = cursor.fetchone()
+        if not appt:
+            return error('Appointment not found', 404)
+        if appt['status'] != 'completed':
+            return error('Only completed appointments can be billed', 400)
+
         cursor.execute(
-            """INSERT INTO bills (patient_id, doctor_id, amount, details)
-               VALUES (%s, %s, %s, %s)""",
-            (patient_id, doctor_id, amount, details)
+            """INSERT INTO bills (patient_id, doctor_id, appointment_id, amount, details)
+               VALUES (%s, %s, %s, %s, %s)""",
+            (patient_id, doctor_id, appointment_id, amount, details)
         )
         bill_id = cursor.lastrowid
 

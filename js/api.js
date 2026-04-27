@@ -94,6 +94,12 @@ const DoctorAPI = {
   },
   approve(userId) {
     return apiFetch(`/doctors/${userId}/approve`, { method: 'PUT' });
+  },
+  updateAvailability(doctorId, payload) {
+    return apiFetch(`/doctors/${doctorId}/availability`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
   }
 };
 
@@ -102,6 +108,12 @@ const DoctorAPI = {
 const AppointmentAPI = {
   book(payload) {
     return apiFetch('/appointments', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+  bookManual(payload) {
+    return apiFetch('/appointments/manual', {
       method: 'POST',
       body: JSON.stringify(payload)
     });

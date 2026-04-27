@@ -18,21 +18,32 @@ def search_patients(current_user):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        query = """
-            SELECT id, name, email
-            FROM users
-            WHERE role = 'patient'
-        """
-        params = []
+        if current_user['role'] == 'doctor':
+            query = """
+                SELECT DISTINCT u.id, u.name, u.email
+                FROM users u
+                JOIN appointments a ON u.id = a.patient_id
+                JOIN doctors d ON a.doctor_id = d.id
+                WHERE u.role = 'patient' AND d.user_id = %s
+            """
+            params = [current_user['id']]
+        else:
+            query = """
+                SELECT id, name, email
+                FROM users u
+                WHERE role = 'patient'
+            """
+            params = []
+
         if search:
             if search.isdigit():
-                query += " AND (name LIKE %s OR id = %s)"
+                query += " AND (u.name LIKE %s OR u.id = %s)"
                 params.extend([f'%{search}%', int(search)])
             else:
-                query += " AND name LIKE %s"
+                query += " AND u.name LIKE %s"
                 params.append(f'%{search}%')
                 
-        query += " ORDER BY name LIMIT 50"
+        query += " ORDER BY u.name LIMIT 50"
         cursor.execute(query, params)
         patients = cursor.fetchall()
         return success(patients)

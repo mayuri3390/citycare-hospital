@@ -56,6 +56,12 @@ def init_db(app):
             if statement and not statement.startswith('--'):
                 try:
                     cursor.execute(statement)
+                    # Consume any results to avoid "Unread result found"
+                    while True:
+                        if cursor.with_rows:
+                            cursor.fetchall()
+                        if not cursor.nextset():
+                            break
                 except mysql.connector.Error:
                     pass  # ignore "already exists" errors etc.
 
